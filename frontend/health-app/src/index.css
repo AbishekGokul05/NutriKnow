@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .chat-container {
+    @apply max-w-4xl mx-auto p-4;
+  }
+  
+  .message-container {
+    @apply space-y-4 mb-4;
+  }
+
+  .message {
+    @apply p-4 rounded-lg max-w-[80%];
+  }
+
+  .user-message {
+    @apply bg-primary text-white ml-auto;
+  }
+
+  .bot-message {
+    @apply bg-gray-100 text-gray-800;
+  }
+
+  .input-container {
+    @apply fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200;
+  }
+}
+
+.bot-message ul {
+  @apply list-disc pl-6 my-2;
+}
+
+.bot-message ol {
+  @apply list-decimal pl-6 my-2;
+}
+
+.bot-message pre {
+  @apply bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.bot-message code {
+  @apply font-mono text-sm;
+}
+
+.bot-message blockquote {
+  @apply border-l-4 border-gray-400 pl-4 my-4 italic text-gray-600;
+}
+
+.bot-message table {
+  @apply border-collapse my-4;
+}
+
+.bot-message th {
+  @apply bg-gray-100 p-2 border border-gray-300;
+}
+
+.bot-message td {
+  @apply p-2 border border-gray-300;
+} 
