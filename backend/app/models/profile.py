@@ -1,6 +1,7 @@
 # backend/app/models/profile.py
 from pydantic import BaseModel
-from typing import Optional, Dict
+from typing import Optional, Dict, List
+from app.database.models import Profile  # Import Profile from database.models
 
 # Request model for the profile endpoint
 class ProfileRequest(BaseModel):

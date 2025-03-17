@@ -1,22 +1,56 @@
 # backend/app/database/models.py
-from sqlalchemy import Column, Integer, String, JSON
+"""
+This module defines database models for SQLAlchemy.
+"""
+from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey
+from sqlalchemy.orm import relationship
+from datetime import datetime
 from .base import Base
 
-# User model for the database
+# Define models directly here to avoid circular imports
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)  # Primary key
-    username = Column(String, unique=True, index=True)  # Unique username
-    name = Column(String, nullable=True)  # User's name (optional)
-    profile_picture = Column(String, nullable=True)  # URL or base64 encoded image (optional)
-    preferences = Column(JSON, nullable=True)  # User preferences (e.g., dietary restrictions, allergies, habits)
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# History model for the database
+    # Relationships
+    profile = relationship("Profile", back_populates="user", uselist=False)
+    history = relationship("History", back_populates="user")
+
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    name = Column(String, nullable=True)
+    profile_picture = Column(String, nullable=True)
+    preferences = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="profile")
+
 class History(Base):
     __tablename__ = "history"
 
-    id = Column(Integer, primary_key=True, index=True)  # Primary key
-    user_id = Column(Integer, index=True)  # Foreign key to the users table
-    product_name = Column(String)  # Name of the product
-    analysis = Column(JSON)  # Analysis results for the product (e.g., ingredients, allergens, harmful substances)
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    product_name = Column(String, nullable=False)
+    analysis = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="history")
+
+__all__ = [
+    "User",
+    "Profile",
+    "History"
+]

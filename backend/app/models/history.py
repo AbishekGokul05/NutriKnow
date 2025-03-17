@@ -1,12 +1,12 @@
 # backend/app/models/history.py
+from app.database.models import History  # Import History from database.models
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import Dict, Any, Optional
 
-# Model for a single history entry
+# Add any Pydantic models related to history here if needed
 class HistoryEntry(BaseModel):
-    product_name: str  # Name of the product
-    analysis: Dict[str, List[str]]  # Analysis results for the product (e.g., ingredients, allergens, harmful substances)
-
-# Response model for the history endpoint
-class HistoryResponse(BaseModel):
-    history: List[HistoryEntry]  # List of history entries
+    id: int
+    user_id: int
+    product_name: str
+    analysis: Dict[str, Any]
+    created_at: Optional[str] = None

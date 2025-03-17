@@ -1,6 +1,6 @@
 # backend/app/services/profile_service.py
 from sqlalchemy.orm import Session
-from app.models.database_models import User
+from app.database.models import User
 from typing import Optional, Dict, List
 
 def get_user_profile(db: Session, username: str) -> Optional[User]:

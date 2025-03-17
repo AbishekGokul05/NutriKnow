@@ -1,4 +1,5 @@
 # backend/app/models/__init__.py
+from app.database.models import User, Profile, History
 from .chat import ChatRequest, ChatResponse
 from .ingredients import IngredientAnalysisRequest, IngredientInfo, IngredientAnalysisResponse
 from .comparison import ProductComparisonRequest, ProductComparisonResponse
@@ -7,46 +8,46 @@ from .harmful_substances import HarmfulSubstanceDetectionRequest, HarmfulSubstan
 from .nutritional_benefits import NutritionalBenefitsRequest, NutritionalBenefitsResponse
 from .alternatives import AlternativesRequest, AlternativesResponse
 from .profile import ProfileRequest, ProfileResponse
-from .history import HistoryEntry, HistoryResponse
 
 # Expose all models for easy access
 __all__ = [
-    # Chat models
+    # Database Models
+    "User",
+    "Profile",
+    "History",
+
+    # Chat Models
     "ChatRequest",
     "ChatResponse",
 
-    # Ingredients models
+    # Ingredients Models
     "IngredientAnalysisRequest",
     "IngredientInfo",
     "IngredientAnalysisResponse",
 
-    # Comparison models
+    # Comparison Models
     "ProductComparisonRequest",
     "ProductComparisonResponse",
 
-    # Allergens models
+    # Allergens Models
     "AllergenDetectionRequest",
     "AllergenInfo",
     "AllergenDetectionResponse",
 
-    # Harmful substances models
+    # Harmful Substances Models
     "HarmfulSubstanceDetectionRequest",
     "HarmfulSubstanceInfo",
     "HarmfulSubstanceDetectionResponse",
 
-    # Nutritional benefits models
+    # Nutritional Benefits Models
     "NutritionalBenefitsRequest",
     "NutritionalBenefitsResponse",
 
-    # Alternatives models
+    # Alternatives Models
     "AlternativesRequest",
     "AlternativesResponse",
 
-    # Profile models
+    # Profile Models
     "ProfileRequest",
-    "ProfileResponse",
-
-    # History models
-    "HistoryEntry",
-    "HistoryResponse",
+    "ProfileResponse"
 ]

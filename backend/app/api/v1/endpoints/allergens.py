@@ -1,40 +1,51 @@
 # backend/app/api/v1/endpoints/allergens.py
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+import json
 from app.services.gemini_service import generate_text
-from app.services.profile_service import get_user_preferences  # New: Import profile service
-from app.database.session import get_db  # New: Import database session
-from sqlalchemy.orm import Session  # New: Import SQLAlchemy Session
+from app.services.profile_service import get_user_preferences
+from app.database.session import get_db
+from sqlalchemy.orm import Session
 
 # Initialize router
 router = APIRouter(prefix="/allergens", tags=["allergens"])
 
 # Pydantic models for request/response
 class AllergenDetectionRequest(BaseModel):
-    ocr_text: str  # Extracted text from the uploaded image (ingredients list)
-    username: str  # New: Username to fetch user preferences
+    ocr_text: str
+    username: Optional[str] = None  # Make username optional with default None
 
 class AllergenInfo(BaseModel):
-    ingredient: str  # Ingredient that may cause allergies
-    warning: str  # Polite warning about the allergen
+    ingredient: str
+    warning: str
 
 class AllergenDetectionResponse(BaseModel):
-    allergens: List[AllergenInfo]  # List of allergens and warnings
+    allergens: List[AllergenInfo]
 
-# Allergen detection endpoint
 @router.post("/detect", response_model=AllergenDetectionResponse)
-async def detect_allergens(request: AllergenDetectionRequest, db: Session = Depends(get_db)):  # New: Add db session
+async def detect_allergens(request: AllergenDetectionRequest, db: Session = Depends(get_db)):
     try:
-        # Fetch user preferences
+        # Validate OCR text
+        if not request.ocr_text.strip():
+            raise HTTPException(status_code=400, detail="OCR text cannot be empty")
+
+        # Fetch user preferences if username is provided
         preferences = None
-        if request.username:  # New: Check if username is provided
-            preferences = get_user_preferences(db, request.username)
+        if request.username:
+            try:
+                preferences = get_user_preferences(db, request.username)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Could not fetch preferences for user {request.username}: {str(e)}"
+                )
 
         # Prepare the prompt for Gemini API
+        preferences_text = f"User preferences: {preferences}" if preferences else "No specific user preferences provided"
         prompt = f"""
         Here is a list of ingredients extracted from a product: {request.ocr_text}
-        User preferences: {preferences}  # New: Include user preferences
+        {preferences_text}
         Identify any ingredients that may cause allergies in people.
         For each allergen, provide:
         1. The name of the ingredient.
@@ -43,18 +54,40 @@ async def detect_allergens(request: AllergenDetectionRequest, db: Session = Depe
         """
 
         # Generate response using Gemini API
-        response = generate_text(prompt)
+        try:
+            response_text = generate_text(prompt)
+            # Parse the response as JSON
+            response_data = json.loads(response_text)
+            
+            if not isinstance(response_data, list):
+                raise ValueError("Expected JSON array response")
 
-        # Parse the response into a list of AllergenInfo objects
-        allergens = []
-        for item in response:
-            allergens.append(
+            # Parse the response into a list of AllergenInfo objects
+            allergens = [
                 AllergenInfo(
-                    ingredient=item.get("ingredient", ""),
-                    warning=item.get("warning", ""),
+                    ingredient=item.get("ingredient", "Unknown ingredient"),
+                    warning=item.get("warning", "No specific warning provided")
                 )
+                for item in response_data
+            ]
+
+            return AllergenDetectionResponse(allergens=allergens)
+
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to parse allergen detection response"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error processing allergen detection: {str(e)}"
             )
 
-        return AllergenDetectionResponse(allergens=allergens)
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error during allergen detection: {str(e)}"
+        )

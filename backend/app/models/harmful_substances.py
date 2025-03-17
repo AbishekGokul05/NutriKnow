@@ -15,4 +15,4 @@ class HarmfulSubstanceInfo(BaseModel):
 
 # Response model for the harmful substances detection endpoint
 class HarmfulSubstanceDetectionResponse(BaseModel):
-    harmful_substances: List[HarmfulSubstanceInfo]  # List of harmful substances and their details
+    substances: List[HarmfulSubstanceInfo]  # List of harmful substances and their details

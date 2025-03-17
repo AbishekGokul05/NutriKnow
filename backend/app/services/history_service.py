@@ -1,6 +1,6 @@
 # backend/app/services/history_service.py
 from sqlalchemy.orm import Session
-from app.models.database_models import History
+from app.database.models import History
 from typing import List, Dict
 
 def add_to_history(db: Session, user_id: int, product_name: str, analysis: Dict[str, List[str]]) -> History:
