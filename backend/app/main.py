@@ -76,6 +76,14 @@ async def read_root():
 @app.on_event("startup")
 async def startup_event():
     logger.info(f"Starting {settings.PROJECT_NAME} version {settings.VERSION}")
+    
+    # Create database tables if they don't exist
+    from app.database.init_db import init_db
+    try:
+        init_db()
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Error creating database tables: {str(e)}")
 
 # Shutdown event
 @app.on_event("shutdown")
