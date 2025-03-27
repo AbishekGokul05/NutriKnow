@@ -3,6 +3,7 @@ from typing import List, Optional
 import os
 from functools import lru_cache
 import json
+from loguru import logger
 
 class Settings(BaseSettings):
     # API Settings
@@ -33,6 +34,7 @@ class Settings(BaseSettings):
     
     # Gemini API Settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
     GEMINI_MAX_RETRIES: int = 3
     GEMINI_TIMEOUT: int = 30
     
@@ -52,14 +54,15 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
     ALLOWED_IMAGE_TYPES: List[str] = ["image/jpeg", "image/png"]
     
-    # Google API Settings
-    GOOGLE_API_KEY: Optional[str] = None
-    
     class Config:
         case_sensitive = True
         env_file = ".env"
+        env_file_encoding = "utf-8"
         extra = "allow"  # Allow extra fields in the settings
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings() 
+    settings = Settings()
+    logger.debug(f"Loaded GEMINI_API_KEY from environment: '{settings.GEMINI_API_KEY}'")
+    logger.debug(f"Loaded GOOGLE_API_KEY from environment: '{settings.GOOGLE_API_KEY}'")
+    return settings 
